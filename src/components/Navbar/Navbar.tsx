@@ -32,14 +32,19 @@ export function Navbar() {
     const isConnected = useStoreWallet(state => state.isConnected);
     const addressAccount = useStoreWallet(state => state.address);
 
-    const { userProfileData, setUserProfileData, allUsersAddress, setAllUsersAddress, setAllUsersData } = useUserProfile();
+    const { userProfileData, setUserProfileData, setIsPremiumUser, allUsersAddress, setAllUsersAddress, setAllUsersData } = useUserProfile();
 
-    const {getAllUsers} = useContractInteractions();
+    const { getAllUsers, isPremiumUser } = useContractInteractions();
 
     // console.log(connect({ modalMode: "canAsk" }));
 
 
     const initialiseWebpage = async () => {
+
+        const _isPremiumUser: boolean = await isPremiumUser(addressAccount)
+        console.log("Is premium User", _isPremiumUser)
+        setIsPremiumUser(_isPremiumUser);
+
         const _userData: UserProfile = (await getUsersData([addressAccount]))[0];
         console.log("got Current User Data", _userData)
         setUserProfileData(_userData)

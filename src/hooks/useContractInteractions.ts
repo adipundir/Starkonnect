@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useStoreWallet } from "@/components/ConnectWallet/walletContext";
 import { Match } from "@/type/types";
 import { strkTokenAddress } from "@/constants/constants";
+import { Address } from "@starknet-io/types-js";
 // import { Address } from "@starknet-io/types-js";
 
 const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!;
@@ -151,6 +152,21 @@ export const useContractInteractions = () => {
       });
   };
 
+  const isPremiumUser = async (address : Address): Promise<boolean> => {
+    try {
+      console.log("Address ", address)
+      console.log("type of Address", typeof address)
+      let _isPremiumUser: boolean = await starKonnectContract.is_premium_user(
+        address
+      );
+      console.log("isPremiumUser", _isPremiumUser);
+      return _isPremiumUser;
+    } catch (e: any) {
+      console.error("Error in isPremiumUser:", e);
+      return false; 
+    }
+  };
+  
   const getAllUsers = async (): Promise<string[] | undefined> => {
     try {
       let resp: bigint[] = await starKonnectContract.get_all_users();
@@ -191,5 +207,6 @@ export const useContractInteractions = () => {
     addMatchesToContract,
     withdrawBalance,
     payPremium,
+    isPremiumUser,
   };
 };

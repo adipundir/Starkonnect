@@ -20,6 +20,8 @@ interface UserProfileState {
   setUserProfileData: (profile: UserProfile) => void;
   allUsersAddress: Address[];
   setAllUsersAddress: (allUsersData: Address[]) => void;
+  isPremiumUser : boolean
+  setIsPremiumUser : (isPremiumUser : boolean) => void
   allUsersData: UserProfile[];
   setAllUsersData: (allUsersData: UserProfile[]) => void;
   balance: number;
@@ -54,5 +56,9 @@ export const useUserProfile = create<UserProfileState>()((set) => ({
   allUsersData: [],
   setAllUsersData: (allUsersData: UserProfile[]) => {
     set((_state) => ({ allUsersData }));
+  },
+  isPremiumUser: false,
+  setIsPremiumUser: (isPremiumUser: boolean) => {
+    set((_state) => ({ isPremiumUser }));
   },
 }));

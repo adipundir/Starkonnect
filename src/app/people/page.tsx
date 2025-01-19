@@ -105,7 +105,7 @@ const getMatchesFromAPI = async () => {
 };
 const loadingStates = [
     {
-        text: "Scanning builder personas...",
+        text: "Scanning personas...",
     },
     {
         text: "Calculating compatibility scores...",

@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       - Their expertise
       - Depth of knowledge
       - Number of projects
-      - Overall personality as a builder.
+      - Overall personality as a developer.
   
       Only return the numeric score as the output.
     `;

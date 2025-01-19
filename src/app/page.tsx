@@ -201,11 +201,11 @@ export default function Home() {
 
                 console.log("ExaDrive response", res)
 
-                createProfile();
+                const resp = await createProfile();
 
                 setModalOpen(false)
 
-                // toast("Builder Profile Created Successfully!");
+                // toast(" Profile Created Successfully!");
             } catch (error) {
                 console.error("Profile creation failed", error);
             } finally {
@@ -218,9 +218,6 @@ export default function Home() {
         <div className="max-h-[100vh] min-h-[100vh] gap-4 flex flex-col w-full items-center justify-center ">
             <div className="text-4xl font-semibold text-black dark:text-white">
                 <p className="italic">Right People Right Time.</p> <br />
-                {/* <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none">
-                    Builder lattice.
-                </span> */}
                 <GradientHeading
                     variant="default"
                     size="xxl"

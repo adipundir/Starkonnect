@@ -13,11 +13,11 @@ pub struct Match {
 #[starknet::interface]
 pub trait IStarkonnectCore<TContractState> {
     fn create_profile(ref self: TContractState);
-    fn add_matches(ref self: TContractState, matches: Array<Match>);
     fn buy_premium(ref self: TContractState);
     fn withdraw_balance(ref self: TContractState);
+    fn is_premium_user(self: @TContractState, user: ContractAddress) -> bool;
+    fn get_premium_price(self: @TContractState) -> u256;
     fn get_balance(self: @TContractState, user: ContractAddress) -> u256;
-    fn get_all_users(self: @TContractState) -> Array<ContractAddress>;
     fn get_user_matches(self: @TContractState, user: ContractAddress) -> Array<Match>;
 }
 
@@ -65,12 +65,6 @@ mod starkonnectCore {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct MatchAdded {
-        user_address: ContractAddress,
-        new_match: Match,
-    }
-
-    #[derive(Drop, starknet::Event)]
     struct PremiumBought {
         user_address: ContractAddress,
     }
@@ -85,7 +79,6 @@ mod starkonnectCore {
     #[derive(Drop, starknet::Event)]
     enum Event {
         UserCreated: UserCreated,
-        MatchAdded: MatchAdded,
         PremiumBought: PremiumBought,
         Withdrawal: Withdrawal,
         #[flat]
@@ -113,23 +106,6 @@ mod starkonnectCore {
             assert!(!self._user_exists(user_address), "User already exists");
             self.users.append().write(user_address);
             self.emit(UserCreated { user_address });
-        }
-
-        fn add_matches(ref self: ContractState, matches: Array<Match>) {
-            let user_address = get_caller_address();
-            assert!(self._user_exists(user_address), "User does not exist");
-
-            for match_ in matches {
-                self
-                    ._add_match(
-                        match_.user_address,
-                        match_.name,
-                        match_.bio,
-                        match_.dev_score,
-                        match_.compatibility_score,
-                        match_.remark,
-                    );
-            }
         }
 
         fn buy_premium(ref self: ContractState) {
@@ -185,21 +161,12 @@ mod starkonnectCore {
             self.reentrancy_guard.end();
         }
 
-        fn get_balance(self: @ContractState, user: ContractAddress) -> u256 {
-            self.user_balance.entry(user).read()
+        fn is_premium_user(self: @ContractState, user: ContractAddress) -> bool {
+            self.premium_user.entry(user).read()
         }
 
-        fn get_all_users(self: @ContractState) -> Array<ContractAddress> {
-            let user = get_caller_address();
-            let userfelt: felt252 = user.into();
-            assert!(
-                self.premium_user.entry(user).read(), "User does not have premium {}", userfelt,
-            );
-            let mut users = ArrayTrait::new();
-            for i in 0..self.users.len() {
-                users.append(self.users.at(i).read());
-            };
-            users
+        fn get_balance(self: @ContractState, user: ContractAddress) -> u256 {
+            self.user_balance.entry(user).read()
         }
 
         fn get_user_matches(self: @ContractState, user: ContractAddress) -> Array<Match> {
@@ -211,40 +178,14 @@ mod starkonnectCore {
             };
             matches
         }
+
+        fn get_premium_price(self: @ContractState) -> u256 {
+            self.premium_price.read()
+        }
     }
 
     #[generate_trait]
     impl InternalFunctions of InternalFunctionsTrait {
-        fn _add_match(
-            ref self: ContractState,
-            other_user: ContractAddress,
-            name: ByteArray,
-            bio: ByteArray,
-            dev_score: u64,
-            compatibility_score: u64,
-            remark: ByteArray,
-        ) {
-            let user_address = get_caller_address();
-            assert!(self._user_exists(user_address), "User does not exist");
-            let user_matches_entry = self.user_matches_map.entry(user_address);
-
-            let new_match = Match {
-                user_address: other_user, name, bio, dev_score, compatibility_score, remark,
-            };
-            user_matches_entry.append().write(new_match);
-            self
-                .emit(
-                    MatchAdded {
-                        user_address,
-                        new_match: self
-                            .user_matches_map
-                            .entry(user_address)
-                            .at(self.user_matches_map.entry(user_address).len() - 1)
-                            .read(),
-                    },
-                );
-        }
-
         fn _user_exists(self: @ContractState, user: ContractAddress) -> bool {
             let mut found = false;
             for i in 0..self.users.len() {

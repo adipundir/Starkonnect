@@ -2,7 +2,35 @@ export const StarKonnectABI = [
   {
     type: "impl",
     name: "StarkonnectImpl",
-    interface_name: "starkonnect::starkonnect::IStarkonnectCore",
+    interface_name: "starkonnet_contracts::starkonnect::IStarkonnectCore",
+  },
+  {
+    type: "enum",
+    name: "core::bool",
+    variants: [
+      {
+        name: "False",
+        type: "()",
+      },
+      {
+        name: "True",
+        type: "()",
+      },
+    ],
+  },
+  {
+    type: "struct",
+    name: "core::integer::u256",
+    members: [
+      {
+        name: "low",
+        type: "core::integer::u128",
+      },
+      {
+        name: "high",
+        type: "core::integer::u128",
+      },
+    ],
   },
   {
     type: "struct",
@@ -24,7 +52,7 @@ export const StarKonnectABI = [
   },
   {
     type: "struct",
-    name: "starkonnect::starkonnect::Match",
+    name: "starkonnet_contracts::starkonnect::Match",
     members: [
       {
         name: "user_address",
@@ -53,39 +81,13 @@ export const StarKonnectABI = [
     ],
   },
   {
-    type: "struct",
-    name: "core::integer::u256",
-    members: [
-      {
-        name: "low",
-        type: "core::integer::u128",
-      },
-      {
-        name: "high",
-        type: "core::integer::u128",
-      },
-    ],
-  },
-  {
     type: "interface",
-    name: "starkonnect::starkonnect::IStarkonnectCore",
+    name: "starkonnet_contracts::starkonnect::IStarkonnectCore",
     items: [
       {
         type: "function",
         name: "create_profile",
         inputs: [],
-        outputs: [],
-        state_mutability: "external",
-      },
-      {
-        type: "function",
-        name: "add_matches",
-        inputs: [
-          {
-            name: "matches",
-            type: "core::array::Array::<starkonnect::starkonnect::Match>",
-          },
-        ],
         outputs: [],
         state_mutability: "external",
       },
@@ -105,6 +107,33 @@ export const StarKonnectABI = [
       },
       {
         type: "function",
+        name: "is_premium_user",
+        inputs: [
+          {
+            name: "user",
+            type: "core::starknet::contract_address::ContractAddress",
+          },
+        ],
+        outputs: [
+          {
+            type: "core::bool",
+          },
+        ],
+        state_mutability: "view",
+      },
+      {
+        type: "function",
+        name: "get_premium_price",
+        inputs: [],
+        outputs: [
+          {
+            type: "core::integer::u256",
+          },
+        ],
+        state_mutability: "view",
+      },
+      {
+        type: "function",
         name: "get_balance",
         inputs: [
           {
@@ -121,17 +150,6 @@ export const StarKonnectABI = [
       },
       {
         type: "function",
-        name: "get_all_users",
-        inputs: [],
-        outputs: [
-          {
-            type: "core::array::Array::<core::starknet::contract_address::ContractAddress>",
-          },
-        ],
-        state_mutability: "view",
-      },
-      {
-        type: "function",
         name: "get_user_matches",
         inputs: [
           {
@@ -141,7 +159,7 @@ export const StarKonnectABI = [
         ],
         outputs: [
           {
-            type: "core::array::Array::<starkonnect::starkonnect::Match>",
+            type: "core::array::Array::<starkonnet_contracts::starkonnect::Match>",
           },
         ],
         state_mutability: "view",
@@ -209,7 +227,7 @@ export const StarKonnectABI = [
   },
   {
     type: "event",
-    name: "starkonnect::starkonnect::starkonnectCore::UserCreated",
+    name: "starkonnet_contracts::starkonnect::starkonnectCore::UserCreated",
     kind: "struct",
     members: [
       {
@@ -221,24 +239,7 @@ export const StarKonnectABI = [
   },
   {
     type: "event",
-    name: "starkonnect::starkonnect::starkonnectCore::MatchAdded",
-    kind: "struct",
-    members: [
-      {
-        name: "user_address",
-        type: "core::starknet::contract_address::ContractAddress",
-        kind: "data",
-      },
-      {
-        name: "new_match",
-        type: "starkonnect::starkonnect::Match",
-        kind: "data",
-      },
-    ],
-  },
-  {
-    type: "event",
-    name: "starkonnect::starkonnect::starkonnectCore::PremiumBought",
+    name: "starkonnet_contracts::starkonnect::starkonnectCore::PremiumBought",
     kind: "struct",
     members: [
       {
@@ -250,7 +251,7 @@ export const StarKonnectABI = [
   },
   {
     type: "event",
-    name: "starkonnect::starkonnect::starkonnectCore::Withdrawal",
+    name: "starkonnet_contracts::starkonnect::starkonnectCore::Withdrawal",
     kind: "struct",
     members: [
       {
@@ -324,27 +325,22 @@ export const StarKonnectABI = [
   },
   {
     type: "event",
-    name: "starkonnect::starkonnect::starkonnectCore::Event",
+    name: "starkonnet_contracts::starkonnect::starkonnectCore::Event",
     kind: "enum",
     variants: [
       {
         name: "UserCreated",
-        type: "starkonnect::starkonnect::starkonnectCore::UserCreated",
-        kind: "nested",
-      },
-      {
-        name: "MatchAdded",
-        type: "starkonnect::starkonnect::starkonnectCore::MatchAdded",
+        type: "starkonnet_contracts::starkonnect::starkonnectCore::UserCreated",
         kind: "nested",
       },
       {
         name: "PremiumBought",
-        type: "starkonnect::starkonnect::starkonnectCore::PremiumBought",
+        type: "starkonnet_contracts::starkonnect::starkonnectCore::PremiumBought",
         kind: "nested",
       },
       {
         name: "Withdrawal",
-        type: "starkonnect::starkonnect::starkonnectCore::Withdrawal",
+        type: "starkonnet_contracts::starkonnect::starkonnectCore::Withdrawal",
         kind: "nested",
       },
       {

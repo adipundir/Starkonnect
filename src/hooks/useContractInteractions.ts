@@ -1,5 +1,7 @@
 import { useState } from "react";
 import {
+  cairo,
+  CallData,
   Contract,
   InvokeFunctionResponse,
   type GetTransactionReceiptResponse,
@@ -8,7 +10,8 @@ import { StarKonnectABI } from "../constants/StarKonnectABI";
 import { toast } from "sonner";
 import { useStoreWallet } from "@/components/ConnectWallet/walletContext";
 import { Match } from "@/type/types";
-import { Address } from "@starknet-io/types-js";
+import { strkTokenAddress } from "@/constants/constants";
+// import { Address } from "@starknet-io/types-js";
 
 const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS!;
 
@@ -65,8 +68,9 @@ export const useContractInteractions = () => {
       matches: newMatches,
     });
     console.log("Call=", myCall);
-    console.log("DONE")
-    const resp = await walletAccountFromContext?.execute(myCall)
+    console.log("DONE");
+    const resp = await walletAccountFromContext
+      ?.execute(myCall)
       .then(async (resp: InvokeFunctionResponse) => {
         console.log("createprofile txH : ", resp.transaction_hash);
         setTransactionHash(resp.transaction_hash);
@@ -77,17 +81,30 @@ export const useContractInteractions = () => {
         );
       })
       .catch((e: any) => {
-        console.log("Error in Contract Interation Add matches",e)
+        console.log("Error in Contract Interation Add matches", e);
         toast.error("Error in Adding Matches : ", e);
       });
   };
 
   const payPremium = async () => {
-    console.log("Pay Premium");
-    const myCall = starKonnectContract.populate("buy_premium", []);
-    console.log("Call=", myCall);
+    const premium_fee = await starKonnectContract.get_premium_price();
+    console.log("premium_fee", premium_fee);
     walletAccountFromContext
-      ?.execute(myCall)
+      ?.execute([
+        {
+          contractAddress: strkTokenAddress,
+          entrypoint: "approve",
+          calldata: CallData.compile({
+            spender: starKonnectContract.address,
+            amount: cairo.uint256(premium_fee),
+          }),
+        },
+        {
+          contractAddress: starKonnectContract.address,
+          entrypoint: "buy_premium",
+          calldata: CallData.compile({}),
+        },
+      ])
       .then(async (resp: InvokeFunctionResponse) => {
         console.log("Pay Premium txH : ", resp.transaction_hash);
         setTransactionHash(resp.transaction_hash);
@@ -154,10 +171,9 @@ export const useContractInteractions = () => {
     }
   };
 
-
-
   const getUserMatches = () => {
-    starKonnectContract.get_user_matches()
+    starKonnectContract
+      .get_user_matches()
       .then((resp: Match[]) => {
         console.log("Current matches :", resp);
         return resp;

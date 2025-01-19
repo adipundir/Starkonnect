@@ -59,11 +59,14 @@ export const useContractInteractions = () => {
   };
 
   const addMatchesToContract = async (newMatches: Match[]) => {
+    console.log("new matches", newMatches);
     console.log("Add matches Function =", starKonnectContract.functions);
-    const myCall = starKonnectContract.populate("add_matches", [newMatches]);
+    const myCall = starKonnectContract.populate("add_matches", {
+      matches: newMatches,
+    });
     console.log("Call=", myCall);
-    walletAccountFromContext
-      ?.execute(myCall)
+    console.log("DONE")
+    const resp = await walletAccountFromContext?.execute(myCall)
       .then(async (resp: InvokeFunctionResponse) => {
         console.log("createprofile txH : ", resp.transaction_hash);
         setTransactionHash(resp.transaction_hash);
@@ -74,6 +77,7 @@ export const useContractInteractions = () => {
         );
       })
       .catch((e: any) => {
+        console.log("Error in Contract Interation Add matches",e)
         toast.error("Error in Adding Matches : ", e);
       });
   };

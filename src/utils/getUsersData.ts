@@ -7,10 +7,14 @@ export const getUsersData = async (
 ): Promise<UserProfile[]> => {
   const usersData: UserProfile[] = await Promise.all(
     usersAddressArray?.map(async (userAddress) => {
-      const { data } = await axios.get(
-          `https://starkonnect.exadrivecdn.com/userData/walletAddress/${userAddress}/data.json`
-      );
-      return data;
+      try {
+        const { data } = await axios.get(
+            `https://starkonnect.exadrivecdn.com/userData/walletAddress/${userAddress}/data.json`
+        );
+        return data;
+      } catch (error) {
+        console.log(error)
+      }
     })
   );
   return usersData;

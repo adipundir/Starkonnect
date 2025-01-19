@@ -29,7 +29,7 @@ export default function ConnectWallet() {
 
     async function selectW() {
         setError(false);
-        const myWalletSWO = await connect({ modalMode: "alwaysAsk" });
+        const myWalletSWO = await connect({ modalMode: "canAsk" }, );
         if (myWalletSWO) {
             const isValid = await checkCompatibility(myWalletSWO);
             setError(!isValid);

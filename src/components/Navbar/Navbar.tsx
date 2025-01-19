@@ -16,6 +16,7 @@ import { GradientButton } from '../gradient-button'
 import { useUserProfile } from '@/provider/providerContext'
 import { UserProfile } from '@/type/types'
 import { useContractInteractions } from '@/hooks/useContractInteractions'
+import { connect } from '@starknet-io/get-starknet';
 
 const routes = [
     { path: '/', label: 'Home', value: 'home' },
@@ -34,6 +35,8 @@ export function Navbar() {
     const { userProfileData, setUserProfileData, allUsersAddress, setAllUsersAddress, setAllUsersData } = useUserProfile();
 
     const {getAllUsers} = useContractInteractions();
+
+    // console.log(connect({ modalMode: "canAsk" }));
 
 
     const initialiseWebpage = async () => {

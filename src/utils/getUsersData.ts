@@ -9,7 +9,7 @@ export const getUsersData = async (
     usersAddressArray?.map(async (userAddress) => {
       try {
         const { data } = await axios.get(
-            `https://starkonnect.exadrivecdn.com/userData/walletAddress/${userAddress}/data.json`
+            `https://star-konnect.exadrivecdn.com/userData/walletAddress/${userAddress}/data.json`
         );
         return data;
       } catch (error) {

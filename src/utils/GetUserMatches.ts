@@ -7,7 +7,7 @@ export const getUserMatches = async (
 ): Promise<Match[]> => {
       try {
         const { data } = await axios.get(
-          `https://starkonnect.exadrivecdn.com/userData/walletAddress/${userAddress}/matches.json`
+          `https://star-konnect.exadrivecdn.com/userData/walletAddress/${userAddress}/matches.json`
         );
         console.log(data);
         return data.userMatches;

@@ -5,7 +5,7 @@ import extractProcessedLinkedInData from "./ExtractProcessedLinkedInData";
 const api_key = process.env.LINKEDIN_API_KEY!;
 const url = "https://api.scrapingdog.com/linkedin";
 
-export default function fetchLinkedin(profile_id: string): Promise<any> {
+export default async function fetchLinkedin(profile_id: string): Promise<any> {
   return new Promise(async (resolve, reject) => {
     try {
       const params = {

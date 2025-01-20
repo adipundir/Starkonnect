@@ -24,8 +24,8 @@ interface UserProfileState {
   setIsPremiumUser : (isPremiumUser : boolean) => void
   allUsersData: UserProfile[];
   setAllUsersData: (allUsersData: UserProfile[]) => void;
-  balance: number;
-  setBalance: (balance: number) => void;
+  balance: Number;
+  setBalance: (balance: Number) => void;
   currentMatches: Match[];
   setCurrentMatches: (currentMatches: Match[]) => void;
   newMatches: Match[];
@@ -38,7 +38,7 @@ export const useUserProfile = create<UserProfileState>()((set) => ({
     set((_state) => ({ userProfileData }));
   },
   balance: 0,
-  setBalance: (balance: number) => {
+  setBalance: (balance: Number) => {
     set((_state) => ({ balance }));
   },
   currentMatches: [],

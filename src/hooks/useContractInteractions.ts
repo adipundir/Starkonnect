@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   cairo,
   CallData,
   Contract,
   InvokeFunctionResponse,
-  type GetTransactionReceiptResponse,
 } from "starknet";
 import { StarKonnectABI } from "../constants/StarKonnectABI";
 import { toast } from "sonner";
@@ -23,24 +22,32 @@ export const useContractInteractions = () => {
   );
   // Trx State
   const [transactionHash, setTransactionHash] = useState<string>("");
-  const [_transactionResult, setTransactionResult] = useState<
-    GetTransactionReceiptResponse | undefined
-  >(undefined);
-
   const [starKonnectContract, setStarKonnectContract] = useState<Contract>(
     new Contract(StarKonnectABI, contractAddress, walletAccountFromContext)
   );
 
-  //   useEffect(() => {
-  //     if (isConfirmed) {
-  //       toast.success(`Transaction confirmed successfully! ${hash}`);
-  //     } else if (error) {
-  //       console.log("error", error);
-  //       toast.error(`Error: ${error.message} ${hash}`);
-  //     } else if (isConfirming) {
-  //       toast.info(`Transaction is confirming... ${hash}`);
-  //     }
-  //   }, [isConfirming, isConfirmed, error, hash]);
+  useEffect(() => {
+    const fetchTransactionResult = async () => {
+      if (transactionHash) {
+        try {
+          toast.info("Waiting for transaction confirmation...");
+          const result = await walletAccountFromContext?.waitForTransaction(
+            transactionHash
+          );
+          console.log("Transaction Result:", result);
+
+          // Show success toast
+          toast.success("Transaction successful!");
+        } catch (e: any) {
+          console.error("Error in transaction confirmation:", e);
+          toast.error("Transaction failed.");
+        }
+      }
+    };
+
+    fetchTransactionResult();
+  }, [transactionHash]); 
+
 
   const createProfile = async () => {
     console.log("Create Profile Function =", starKonnectContract.functions);
@@ -51,39 +58,9 @@ export const useContractInteractions = () => {
       .then(async (resp: InvokeFunctionResponse) => {
         console.log("createprofile txH : ", resp.transaction_hash);
         setTransactionHash(resp.transaction_hash);
-        setTransactionResult(
-          await walletAccountFromContext.waitForTransaction(
-            resp.transaction_hash
-          )
-        );
       })
       .catch((e: any) => {
         toast.error("Error in Creating Profile : ", e);
-      });
-  };
-
-  const addMatchesToContract = async (newMatches: Match[]) => {
-    console.log("new matches", newMatches);
-    console.log("Add matches Function =", starKonnectContract.functions);
-    const myCall = starKonnectContract.populate("add_matches", {
-      matches: newMatches,
-    });
-    console.log("Call=", myCall);
-    console.log("DONE");
-    const resp = await walletAccountFromContext
-      ?.execute(myCall)
-      .then(async (resp: InvokeFunctionResponse) => {
-        console.log("createprofile txH : ", resp.transaction_hash);
-        setTransactionHash(resp.transaction_hash);
-        setTransactionResult(
-          await walletAccountFromContext.waitForTransaction(
-            resp.transaction_hash
-          )
-        );
-      })
-      .catch((e: any) => {
-        console.log("Error in Contract Interation Add matches", e);
-        toast.error("Error in Adding Matches : ", e);
       });
   };
 
@@ -109,11 +86,6 @@ export const useContractInteractions = () => {
       .then(async (resp: InvokeFunctionResponse) => {
         console.log("Pay Premium txH : ", resp.transaction_hash);
         setTransactionHash(resp.transaction_hash);
-        setTransactionResult(
-          await walletAccountFromContext.waitForTransaction(
-            resp.transaction_hash
-          )
-        );
       })
       .catch((e: any) => {
         toast.error("Error in paying premium : ", e);
@@ -129,27 +101,23 @@ export const useContractInteractions = () => {
       .then(async (resp: InvokeFunctionResponse) => {
         console.log("Withdraw Balance txH : ", resp.transaction_hash);
         setTransactionHash(resp.transaction_hash);
-        setTransactionResult(
-          await walletAccountFromContext.waitForTransaction(
-            resp.transaction_hash
-          )
-        );
       })
       .catch((e: any) => {
         toast.error("Error in withdrawing balance : ", e);
       });
   };
 
-  const getBalance = () => {
-    starKonnectContract
-      .get_balance()
-      .then((resp: bigint) => {
-        console.log("balance response :", resp);
-        return Number(resp);
-      })
-      .catch((e: any) => {
-        console.log("error get_balance =", e);
-      });
+  const getBalance = async (address: Address): Promise<number> => {
+    try {
+      const resp: bigint = await starKonnectContract.get_balance(address);
+      console.log("balance response:", resp);
+      const balance = Number(resp) / 10 ** 18; 
+      return balance;
+    } catch (e: any) {
+      console.error("error get_balance =", e);
+      console.log("Sending Default Balance");
+      return 0; 
+    }
   };
 
   const isPremiumUser = async (address : Address): Promise<boolean> => {
@@ -187,24 +155,10 @@ export const useContractInteractions = () => {
     }
   };
 
-  const getUserMatches = () => {
-    starKonnectContract
-      .get_user_matches()
-      .then((resp: Match[]) => {
-        console.log("Current matches :", resp);
-        return resp;
-      })
-      .catch((e: any) => {
-        console.log("error getting Current matches ", e);
-      });
-  };
-
   return {
     getBalance,
     getAllUsers,
-    getUserMatches,
     createProfile,
-    addMatchesToContract,
     withdrawBalance,
     payPremium,
     isPremiumUser,

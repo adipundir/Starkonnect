@@ -33,54 +33,6 @@ export const StarKonnectABI = [
     ],
   },
   {
-    type: "struct",
-    name: "core::byte_array::ByteArray",
-    members: [
-      {
-        name: "data",
-        type: "core::array::Array::<core::bytes_31::bytes31>",
-      },
-      {
-        name: "pending_word",
-        type: "core::felt252",
-      },
-      {
-        name: "pending_word_len",
-        type: "core::integer::u32",
-      },
-    ],
-  },
-  {
-    type: "struct",
-    name: "starkonnet_contracts::starkonnect::Match",
-    members: [
-      {
-        name: "user_address",
-        type: "core::starknet::contract_address::ContractAddress",
-      },
-      {
-        name: "name",
-        type: "core::byte_array::ByteArray",
-      },
-      {
-        name: "bio",
-        type: "core::byte_array::ByteArray",
-      },
-      {
-        name: "dev_score",
-        type: "core::integer::u64",
-      },
-      {
-        name: "compatibility_score",
-        type: "core::integer::u64",
-      },
-      {
-        name: "remark",
-        type: "core::byte_array::ByteArray",
-      },
-    ],
-  },
-  {
     type: "interface",
     name: "starkonnet_contracts::starkonnect::IStarkonnectCore",
     items: [
@@ -150,16 +102,11 @@ export const StarKonnectABI = [
       },
       {
         type: "function",
-        name: "get_user_matches",
-        inputs: [
-          {
-            name: "user",
-            type: "core::starknet::contract_address::ContractAddress",
-          },
-        ],
+        name: "get_all_users",
+        inputs: [],
         outputs: [
           {
-            type: "core::array::Array::<starkonnet_contracts::starkonnect::Match>",
+            type: "core::array::Array::<core::starknet::contract_address::ContractAddress>",
           },
         ],
         state_mutability: "view",

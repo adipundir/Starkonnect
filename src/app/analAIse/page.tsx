@@ -22,7 +22,7 @@ export default function AnalAIse() {
         stop,
         append
     } = useChat({
-        api: "/api/generateBLChatResponse",
+        api: "/api/generateanalAiResponse",
         body: context,
         streamProtocol: "text",
         onError: (error: Error) => {
@@ -35,7 +35,7 @@ export default function AnalAIse() {
            <div className="flex flex-col gap-4 h-[100vh] w-full items-center justify-center">
                 <div className="text-xl font-extralight">This is a Premium Feature 🤩</div>
                 <GradientButton onClick={payPremium}>
-                    Pay 0.1 STRK
+                    Pay 10 STRK
                 </GradientButton>
            </div>
         )
@@ -52,7 +52,7 @@ export default function AnalAIse() {
                 stop={stop}
                 append={append}
                 suggestions={[
-                    "Which Tech Stack is most populer in India amoung age group 20-25?",
+                    "Which Tech Stack is most popular in India amoung age group 20-25?",
                     "Is this the right time to launch a NextJS course for Indian audience?",
                     "Which city in India should we hire skilled React Native Developers from?"
                 ]}

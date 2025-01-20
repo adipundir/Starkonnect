@@ -14,6 +14,7 @@ import { useUserProfile } from "@/provider/providerContext";
 import { useStoreWallet } from "@/components/ConnectWallet/walletContext";
 import { MatchesContainer } from "@/components/MatchesContainer";
 import { MultiStepLoader } from "@/components/multi-step-loader";
+import { uploadJMatchesToExaDrive } from "@/utils/UploadMatchJSONToExadrive";
 
 // Simulated function to get matches 
 const getMatchesFromAPI = async () => {
@@ -123,8 +124,6 @@ export default function Home() {
     const isConnected = useStoreWallet(state => state.isConnected);
     const addressAccount = useStoreWallet(state => state.address);
 
-    const { addMatchesToContract } = useContractInteractions()
-
     const handleGenerateMatches = async (): Promise<void> => {
         try {
             console.log("generate responses run")
@@ -153,8 +152,8 @@ export default function Home() {
 
                 // const serialisedMatches = await serializeMatches(res)
 
-                console.log("User's Matches:", res.data.matches.trim("`"));
-                setNewMatches(JSON.parse(res.data.matches.trim("```")))
+                console.log("User's Matches:", res.data.matches.toString().trim("`"));
+                setNewMatches(JSON.parse(res.data.matches.toString().trim("```")))
             }
         } catch (error) {
             console.error("Error in handleGenerateHatches:", error);
@@ -171,7 +170,8 @@ export default function Home() {
 
     const handleAddMatchesToContract = async () => {
         try {
-            await addMatchesToContract(newMatches)
+            await uploadJMatchesToExaDrive(currentMatches, newMatches, addressAccount)
+            toast.success("Matches Saved")
         } catch (error) {
             toast.error("Error Uploading Matches to Contract");
         }
@@ -184,7 +184,7 @@ export default function Home() {
                     <p>New Matches ✨</p>
                     <div className="flex gap-4 w-fit">
                         {newMatches?.length > 0 && <Button onClick={handleAddMatchesToContract} disabled={isLoading} className="font-bold">
-                            {!isLoading && < PlusIcon />} {isLoading ? "Loading..." : `Add ${newMatches?.length} matches to Contract`}
+                            {!isLoading && < PlusIcon />} {isLoading ? "Loading..." : `Add ${newMatches?.length > 1 ? "Matches" : "Match"} `}
                         </Button>}
 
                         {(currentMatches?.length > 0 || newMatches?.length > 0) && <Button onClick={handleGenerateMatches} disabled={isLoading} className="font-bold">

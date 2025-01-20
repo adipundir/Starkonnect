@@ -14,9 +14,21 @@ import ConnectWallet from '@/components/ConnectWallet/ConnectWallet'
 import { useStoreWallet } from '@/components/ConnectWallet/walletContext'
 import { GradientButton } from '../gradient-button'
 import { useUserProfile } from '@/provider/providerContext'
-import { UserProfile } from '@/type/types'
+import { Match, UserProfile } from '@/type/types'
 import { useContractInteractions } from '@/hooks/useContractInteractions'
 import { connect } from '@starknet-io/get-starknet';
+import { getUserMatches } from '@/utils/GetUserMatches'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 const routes = [
     { path: '/', label: 'Home', value: 'home' },
@@ -31,10 +43,11 @@ export function Navbar() {
     const pathname = usePathname()
     const isConnected = useStoreWallet(state => state.isConnected);
     const addressAccount = useStoreWallet(state => state.address);
+    const [ showBalanceModal, setShowBalanceModal ] = useState<boolean>(false);
 
-    const { userProfileData, setUserProfileData, setIsPremiumUser, allUsersAddress, setAllUsersAddress, setAllUsersData } = useUserProfile();
+    const { userProfileData, setUserProfileData, setIsPremiumUser, allUsersAddress, balance, setBalance, setAllUsersAddress, setAllUsersData, setCurrentMatches } = useUserProfile();
 
-    const { getAllUsers, isPremiumUser } = useContractInteractions();
+    const { getAllUsers, isPremiumUser, getBalance, withdrawBalance } = useContractInteractions();
 
     // console.log(connect({ modalMode: "canAsk" }));
 
@@ -45,16 +58,23 @@ export function Navbar() {
         console.log("Is premium User", _isPremiumUser)
         setIsPremiumUser(_isPremiumUser);
 
+        const _balance: Number = (await getBalance(addressAccount))
+        console.log("got User Balance", _balance)
+        setBalance(_balance)
+
         const _userData: UserProfile = (await getUsersData([addressAccount]))[0];
         console.log("got Current User Data", _userData)
         setUserProfileData(_userData)
+
+        const _userMatches: Match[] = (await getUserMatches(addressAccount));
+        console.log("got Current User matches", _userMatches)
+        setCurrentMatches(_userMatches)
 
         const _usersAddress = await getAllUsers();
         console.log("Got All Users Address:", _usersAddress);
         setAllUsersAddress(_usersAddress as Address[]);
 
-
-        const _usersData: UserProfile[] = await getUsersData(allUsersAddress);
+        const _usersData: UserProfile[] = await getUsersData(_usersAddress ?? []);
         console.log("got All Users Data", _usersData)
         setAllUsersData(_usersData)
     }
@@ -103,25 +123,51 @@ export function Navbar() {
                             {theme === 'dark' ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
                             <span className="sr-only">Toggle theme</span>
                         </Button>
-                        {!isConnected ? <ConnectWallet /> :
-                            <GradientButton onClick={() => {
-                                useStoreWallet.setState({ isConnected: false });
-                            }}
-                            >
-                                {formatAddress(addressAccount)}
-                            </GradientButton>
+                        {!isConnected ? <ConnectWallet /> :(
+                            <div className='flex gap-4 items-center justify-center'>
+                                <AlertDialog open={showBalanceModal} onOpenChange={setShowBalanceModal}>
+                                    <AlertDialogTrigger asChild>
+                                        <GradientButton onClick={() => {
+                                            setShowBalanceModal(true);
+                                        }}>
+                                            Check Balance
+                                        </GradientButton>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Your Current Balance : {balance as number} STRK </AlertDialogTitle>
+                                            {/* <AlertDialogDescription>
+                                                Your Current balance is 
+                                            </AlertDialogDescription> */}
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={withdrawBalance}>Withdraw</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                                <GradientButton onClick={() => {
+                                    useStoreWallet.setState({ isConnected: false });
+                                }}
+                                >
+                                    {formatAddress(addressAccount)}
+                                </GradientButton>
+                            </div>
+                        )
                         }
 
-                        {isConnected ? (
+                        {isConnected && (userProfileData ? (
                             <Link href={`/profile/${addressAccount}`}>
                                 <Avatar>
                                     <AvatarImage src={`https://github.com/${userProfileData?.githubUsername}.png`} alt={userProfileData?.name} />
-                                    <AvatarFallback><AvatarImage src={`https://api.dicebear.com/6.x/avataaars/svg?seed=${userProfileData?.name}`} /></AvatarFallback>
                                 </Avatar>
                             </Link>
                         ) : (
-                            ""
-                        )}
+                                <Avatar>
+                                    <AvatarImage src={`https://api.dicebear.com/6.x/avataaars/svg?seed=${addressAccount}`} alt={addressAccount} />
+                                </Avatar>
+                        ))
+                        }
                     </div>
                 </div>
             </div>

@@ -100,7 +100,6 @@ export default function ProfilePage({params} : any) {
                                 <AvatarFallback>{userData?.name?.split(' ')?.map(n => n[0]).join('')}</AvatarFallback>
                             </Avatar>
                             <div>
-                                {/* <h1 className="text-2xl font-bold">{userData.name}</h1> */}
                                 <HyperText
                                     className="text-2xl font-bold text-black dark:text-white"
                                     text={userData.name}

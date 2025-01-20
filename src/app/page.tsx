@@ -51,8 +51,8 @@ export default function Home() {
     const LinkedinPromise = () => {
         return new Promise(async (resolve, reject) => {
             try {
-                // const linkedInResponse = await fetchLinkedin(formData.linkedinUsername);
-                const linkedInResponse = { fullName: "Test User" }
+                const linkedInResponse = await fetchLinkedin(formData.linkedinUsername);
+                // const linkedInResponse = { fullName: "Test User" }
                 if (!linkedInResponse) {
                     reject();
                     return;
@@ -239,7 +239,7 @@ export default function Home() {
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
-                            <DialogTitle>Create Builder Profile</DialogTitle>
+                            <DialogTitle>Create Profile</DialogTitle>
                             <DialogDescription>
                                 Fill out your details to generate a developer score
                             </DialogDescription>

@@ -1,15 +1,5 @@
 use starknet::{ContractAddress};
 
-#[derive(Drop, Clone, Serde, starknet::Store)]
-pub struct Match {
-    pub user_address: ContractAddress,
-    pub name: ByteArray,
-    pub bio: ByteArray,
-    pub dev_score: u64,
-    pub compatibility_score: u64,
-    pub remark: ByteArray,
-}
-
 #[starknet::interface]
 pub trait IStarkonnectCore<TContractState> {
     fn create_profile(ref self: TContractState);
@@ -18,7 +8,7 @@ pub trait IStarkonnectCore<TContractState> {
     fn is_premium_user(self: @TContractState, user: ContractAddress) -> bool;
     fn get_premium_price(self: @TContractState) -> u256;
     fn get_balance(self: @TContractState, user: ContractAddress) -> u256;
-    fn get_user_matches(self: @TContractState, user: ContractAddress) -> Array<Match>;
+    fn get_all_users(self: @TContractState) -> Array<ContractAddress>;
 }
 
 #[starknet::contract]
@@ -30,7 +20,6 @@ mod starkonnectCore {
         StoragePointerWriteAccess, StoragePointerReadAccess, Vec, VecTrait, MutableVecTrait, Map,
         StoragePathEntry,
     };
-    use super::Match;
     use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::token::erc20::interface::{IERC20Dispatcher, IERC20DispatcherTrait};
     use openzeppelin::security::ReentrancyGuardComponent;
@@ -48,7 +37,6 @@ mod starkonnectCore {
     #[storage]
     struct Storage {
         users: Vec<ContractAddress>,
-        user_matches_map: Map<ContractAddress, Vec<Match>>,
         user_balance: Map<ContractAddress, u256>,
         premium_user: Map<ContractAddress, bool>,
         premium_price: u256,
@@ -169,14 +157,12 @@ mod starkonnectCore {
             self.user_balance.entry(user).read()
         }
 
-        fn get_user_matches(self: @ContractState, user: ContractAddress) -> Array<Match> {
-            assert!(self._user_exists(user), "User does not exist");
-            let mut matches = ArrayTrait::new();
-            let user_matches_entry = self.user_matches_map.entry(user);
-            for i in 0..user_matches_entry.len() {
-                matches.append(user_matches_entry.at(i).read());
+        fn get_all_users(self: @ContractState) -> Array<ContractAddress> {
+            let mut users = ArrayTrait::new();
+            for i in 0..self.users.len() {
+                users.append(self.users.at(i).read());
             };
-            matches
+            users
         }
 
         fn get_premium_price(self: @ContractState) -> u256 {
